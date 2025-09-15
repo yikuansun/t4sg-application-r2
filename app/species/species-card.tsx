@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import type { Database } from "@/lib/schema";
 import Image from "next/image";
 import { useState } from "react";
+import SpeciesInfoModal from "./species-info-modal";
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
 export default function SpeciesCard({ species }: { species: Species }) {
@@ -40,7 +41,7 @@ export default function SpeciesCard({ species }: { species: Species }) {
         Learn More
       </Button>
 
-      {dialogOpen ? <div>Dialog</div> : null}
+      {dialogOpen ? <SpeciesInfoModal species={species} /> : null}
     </div>
   );
 }
