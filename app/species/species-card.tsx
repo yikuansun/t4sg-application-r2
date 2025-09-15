@@ -41,7 +41,7 @@ export default function SpeciesCard({ species }: { species: Species }) {
         Learn More
       </Button>
 
-      {dialogOpen ? <SpeciesInfoModal species={species} /> : null}
+      <SpeciesInfoModal species={species} open={dialogOpen} setOpen={setDialogOpen} />
     </div>
   );
 }
