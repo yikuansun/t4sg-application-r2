@@ -18,8 +18,8 @@ import SpeciesInfoModal from "./species-info-modal";
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
 export default function SpeciesCard({ species }: { species: Species }) {
-  // We use dialogOpen state to control the display of the dialog.
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // control whether the modal is open (passed into the modal component as a prop)
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
@@ -35,13 +35,13 @@ export default function SpeciesCard({ species }: { species: Species }) {
       <Button
         className="mt-3 w-full"
         onClick={() => {
-          setDialogOpen(!dialogOpen);
+          setModalOpen(!modalOpen);
         }}
       >
         Learn More
       </Button>
 
-      <SpeciesInfoModal species={species} open={dialogOpen} setOpen={setDialogOpen} />
+      <SpeciesInfoModal species={species} open={modalOpen} setOpen={setModalOpen} />
     </div>
   );
 }
