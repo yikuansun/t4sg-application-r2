@@ -13,8 +13,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { createBrowserSupabaseClient } from "@/lib/client-utils";
 import type { Database } from "@/lib/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -68,6 +71,34 @@ export default function EditSpeciesDialog({
     form.reset(species);
   }, [species, form]);
 
+  const router = useRouter();
+
+  async function onSubmit(input: FormData) {
+    const supabase = createBrowserSupabaseClient();
+    const { error } = await supabase.from("species").update(input).eq("id", species.id);
+
+    // Catch and report errors from Supabase and exit the onSubmit function with an early 'return' if an error occurred.
+    if (error) {
+      return toast({
+        title: "Something went wrong.",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+
+    // re-render page with updated species
+    router.refresh();
+
+    // close modal
+    setOpen(false);
+
+    // return so page doesn't reload
+    return toast({
+      title: "Species updated!",
+      description: "Successfully updated " + input.scientific_name + ".",
+    });
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-h-screen overflow-y-auto sm:max-w-[600px]">
@@ -77,8 +108,8 @@ export default function EditSpeciesDialog({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={() => {
-              return true;
+            onSubmit={(e) => {
+              void form.handleSubmit(onSubmit)(e);
             }}
           >
             <div className="grid w-full items-center gap-4">
