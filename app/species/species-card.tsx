@@ -18,7 +18,7 @@ import EditSpeciesDialog from "./edit-species-dialog";
 import SpeciesInfoModal from "./species-info-modal";
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
-export default function SpeciesCard({ species }: { species: Species }) {
+export default function SpeciesCard({ species, editable }: { species: Species; editable: boolean }) {
   // control whether the modal is open (passed into the modal component as a prop)
   const [modalOpen, setModalOpen] = useState(false);
   // whether the edit species dialog is open
@@ -44,14 +44,16 @@ export default function SpeciesCard({ species }: { species: Species }) {
         Learn More
       </Button>
       {/* temporary button - replace with corner button later */}
-      <Button
-        className="mt-3 w-full"
-        onClick={() => {
-          setEditing(true);
-        }}
-      >
-        Edit
-      </Button>
+      {editable && (
+        <Button
+          className="mt-3 w-full"
+          onClick={() => {
+            setEditing(true);
+          }}
+        >
+          Edit
+        </Button>
+      )}
 
       <SpeciesInfoModal species={species} open={modalOpen} setOpen={setModalOpen} />
       <EditSpeciesDialog species={species} open={editing} setOpen={setEditing} />
