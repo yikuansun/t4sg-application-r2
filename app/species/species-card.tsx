@@ -14,12 +14,15 @@ import { Button } from "@/components/ui/button";
 import type { Database } from "@/lib/schema";
 import Image from "next/image";
 import { useState } from "react";
+import EditSpeciesDialog from "./edit-species-dialog";
 import SpeciesInfoModal from "./species-info-modal";
 type Species = Database["public"]["Tables"]["species"]["Row"];
 
 export default function SpeciesCard({ species }: { species: Species }) {
   // control whether the modal is open (passed into the modal component as a prop)
   const [modalOpen, setModalOpen] = useState(false);
+  // whether the edit species dialog is open
+  const [editing, setEditing] = useState(false);
 
   return (
     <div className="m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
@@ -40,8 +43,18 @@ export default function SpeciesCard({ species }: { species: Species }) {
       >
         Learn More
       </Button>
+      {/* temporary button - replace with corner button later */}
+      <Button
+        className="mt-3 w-full"
+        onClick={() => {
+          setEditing(true);
+        }}
+      >
+        Edit
+      </Button>
 
       <SpeciesInfoModal species={species} open={modalOpen} setOpen={setModalOpen} />
+      <EditSpeciesDialog species={species} open={editing} setOpen={setEditing} />
     </div>
   );
 }
