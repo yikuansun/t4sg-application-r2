@@ -10,7 +10,14 @@ on the client-side to correctly match component state and props should the order
 React server components don't track state between rerenders, so leaving the uniquely identified components (e.g. SpeciesCard)
 can cause errors with matching props and state in child components if the list order changes.
 */
+import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Database } from "@/lib/schema";
 import Image from "next/image";
 import { useState } from "react";
@@ -25,7 +32,7 @@ export default function SpeciesCard({ species, editable }: { species: Species; e
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
+    <div className="relative m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
       {species.image && (
         <div className="relative h-40 w-full">
           <Image src={species.image} alt={species.scientific_name} fill style={{ objectFit: "cover" }} />
@@ -43,16 +50,31 @@ export default function SpeciesCard({ species, editable }: { species: Species; e
       >
         Learn More
       </Button>
-      {/* temporary button - replace with corner button later */}
       {editable && (
-        <Button
-          className="mt-3 w-full"
-          onClick={() => {
-            setEditing(true);
-          }}
-        >
-          Edit
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="absolute right-2 top-2 h-6 w-6 rounded-full bg-slate-800 bg-opacity-50 p-0 backdrop-blur-sm"
+            >
+              <Icons.ellipsis className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                setEditing(true);
+              }}
+            >
+              <Icons.post className="mr-2 h-3 w-3" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Icons.trash className="mr-2 h-3 w-3" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       <SpeciesInfoModal species={species} open={modalOpen} setOpen={setModalOpen} />
