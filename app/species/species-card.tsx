@@ -21,6 +21,7 @@ import {
 import type { Database } from "@/lib/schema";
 import Image from "next/image";
 import { useState } from "react";
+import DeleteSpeciesDialog from "./delete-species-dialog";
 import EditSpeciesDialog from "./edit-species-dialog";
 import SpeciesInfoModal from "./species-info-modal";
 type Species = Database["public"]["Tables"]["species"]["Row"];
@@ -30,6 +31,8 @@ export default function SpeciesCard({ species, editable }: { species: Species; e
   const [modalOpen, setModalOpen] = useState(false);
   // whether the edit species dialog is open
   const [editing, setEditing] = useState(false);
+  // confirm delete dialog
+  const [deleting, setDeleting] = useState(false);
 
   return (
     <div className="relative m-4 w-72 min-w-72 flex-none rounded border-2 p-3 shadow">
@@ -69,7 +72,11 @@ export default function SpeciesCard({ species, editable }: { species: Species; e
               <Icons.post className="mr-2 h-3 w-3" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setDeleting(true);
+              }}
+            >
               <Icons.trash className="mr-2 h-3 w-3" />
               Delete
             </DropdownMenuItem>
@@ -79,6 +86,7 @@ export default function SpeciesCard({ species, editable }: { species: Species; e
 
       <SpeciesInfoModal species={species} open={modalOpen} setOpen={setModalOpen} />
       <EditSpeciesDialog species={species} open={editing} setOpen={setEditing} />
+      <DeleteSpeciesDialog open={deleting} setOpen={setDeleting} species={species} />
     </div>
   );
 }
