@@ -74,6 +74,35 @@ const defaultValues: Partial<FormData> = {
   description: null,
 };
 
+interface WikipediaResponse {
+  extract: string;
+  originalimage: {
+    source: string;
+  };
+}
+
+async function fetchFromWikipedia(title: string) {
+  const response = await fetch(
+    `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?redirect=false`,
+  );
+  if (!response.ok) {
+    return {
+      status: "error",
+      message: "Failed to fetch data from Wikipedia",
+    };
+  }
+  const data = (await response.json()) as WikipediaResponse;
+  console.log(data);
+  return {
+    status: "success",
+    message: "Data fetched successfully",
+    data: {
+      summary: data.extract,
+      image: data.originalimage.source,
+    },
+  };
+}
+
 export default function AddSpeciesDialog({ userId }: { userId: string }) {
   const router = useRouter();
 
@@ -234,7 +263,38 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
                   const { value, ...rest } = field;
                   return (
                     <FormItem>
-                      <FormLabel>Image URL</FormLabel>
+                      <FormLabel>
+                        Image URL
+                        {(form.getValues().scientific_name.length > 0 || form.getValues().common_name) &&
+                          !form.getValues().image && (
+                            <span
+                              className="ml-2 cursor-pointer text-sm text-muted-foreground underline"
+                              onClick={() => {
+                                let title: string;
+                                if (form.getValues().scientific_name.length > 0) {
+                                  title = form.getValues().scientific_name;
+                                } else {
+                                  title = form.getValues().common_name!;
+                                }
+                                fetchFromWikipedia(title)
+                                  .then((response) => {
+                                    if (response.status === "success") {
+                                      field.onChange(response.data?.image);
+                                    } else {
+                                      toast({
+                                        title: "Error",
+                                        description: response.message,
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  })
+                                  .catch((err) => console.log(err));
+                              }}
+                            >
+                              Fetch from Wikipedia
+                            </span>
+                          )}
+                      </FormLabel>
                       <FormControl>
                         <Input
                           value={value ?? ""}
@@ -255,7 +315,38 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
                   const { value, ...rest } = field;
                   return (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>
+                        Description
+                        {(form.getValues().scientific_name.length > 0 || form.getValues().common_name) &&
+                          !form.getValues().description && (
+                            <span
+                              className="ml-2 cursor-pointer text-sm text-muted-foreground underline"
+                              onClick={() => {
+                                let title: string;
+                                if (form.getValues().scientific_name.length > 0) {
+                                  title = form.getValues().scientific_name;
+                                } else {
+                                  title = form.getValues().common_name!;
+                                }
+                                fetchFromWikipedia(title)
+                                  .then((response) => {
+                                    if (response.status === "success") {
+                                      field.onChange(response.data?.summary);
+                                    } else {
+                                      toast({
+                                        title: "Error",
+                                        description: response.message,
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  })
+                                  .catch((err) => console.log(err));
+                              }}
+                            >
+                              Fetch from Wikipedia
+                            </span>
+                          )}
+                      </FormLabel>
                       <FormControl>
                         <Textarea
                           value={value ?? ""}
