@@ -1,11 +1,8 @@
 /* eslint-disable */
 "use client";
-import { useRef, useEffect, useState  } from "react";
-import { select } from "d3-selection";
-import { scaleBand, scaleLinear, scaleOrdinal } from "d3-scale";
-import { max } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis"; // D3 is a JavaScript library for data visualization: https://d3js.org/
 import { csv } from "d3-fetch";
+import { scaleBand, scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { useEffect, useRef, useState } from "react";
 
@@ -39,7 +36,21 @@ export default function AnimalSpeedGraph() {
         dataTemp.push(datum);
       }
       setAnimalData(dataTemp);
-      console.log("Animal data loaded:", dataTemp);
+
+      // we are only interested animals with highest speeds.
+      let herbivoeres: AnimalDatum[] = dataTemp.filter((d) => d.diet === "herbivore");
+      herbivoeres.sort((a, b) => b.speed - a.speed);
+
+      let carnivores: AnimalDatum[] = dataTemp.filter((d) => d.diet === "carnivore");
+      carnivores.sort((a, b) => b.speed - a.speed);
+
+      let omnivores: AnimalDatum[] = dataTemp.filter((d) => d.diet === "omnivore");
+      omnivores.sort((a, b) => b.speed - a.speed);
+
+      let toDisplay = [...omnivores.slice(0, 5), ...carnivores.slice(0, 5), ...herbivoeres.slice(0, 5)];
+      setAnimalData(toDisplay);
+
+      console.log(toDisplay);
     });
   }, []);
 
@@ -70,13 +81,100 @@ export default function AnimalSpeedGraph() {
     // https://github.com/d3/d3-scale#linear-scales
     // https://github.com/d3/d3-scale#ordinal-scales
     // https://github.com/d3/d3-axis
+
+    // band scales with d3
+    const xScale = scaleBand([100, width]).domain(animalData.map((d) => d.name));
+    let speeds: number[] = animalData.map((d) => d.speed) as number[];
+    let maxSpeed: number = Math.max(...speeds) as number;
+    console.log(maxSpeed);
+    const yScale = scaleLinear()
+      .domain([0, maxSpeed])
+      .range([height - 20, 0]);
+
+    // axis
+    svg
+      .append("g")
+      .attr("transform", `translate(0,${height - 20})`)
+      .call(axisBottom(xScale));
+
+    svg
+      .append("g")
+      .attr("transform", `translate(${100},0)`)
+      .call(axisLeft(yScale))
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", "0.71em")
+      .attr("text-anchor", "end")
+      .text("Speed (km/h)")
+      .style("fill", "currentColor");
+
+    // add the bars
+    svg
+      .selectAll("rect")
+      .data(animalData)
+      .enter()
+      .append("rect")
+      .attr("x", (d) => (xScale(d.name) as number) + 10)
+      .attr("y", (d) => yScale(d.speed) as number)
+      .attr("width", xScale.bandwidth() - 20)
+      .attr("height", (d) => (height - 20 - yScale(d.speed)) as number)
+      .attr("fill", (d) => {
+        switch (d.diet) {
+          case "herbivore":
+            return "lightgreen";
+          case "carnivore":
+            return "salmon";
+          case "omnivore":
+            return "goldenrod";
+        }
+      });
+
+    // create legend
+    svg
+      .append("circle")
+      .attr("cx", width - 120)
+      .attr("cy", 20)
+      .attr("r", 6)
+      .style("fill", "goldenrod");
+    svg
+      .append("circle")
+      .attr("cx", width - 120)
+      .attr("cy", 50)
+      .attr("r", 6)
+      .style("fill", "salmon");
+    svg
+      .append("circle")
+      .attr("cx", width - 120)
+      .attr("cy", 80)
+      .attr("r", 6)
+      .style("fill", "lightgreen");
+    svg
+      .append("text")
+      .attr("x", width - 100)
+      .attr("y", 20)
+      .text("Omnivores")
+      .style("font-size", "15px")
+      .attr("alignment-baseline", "middle")
+      .style("fill", "currentColor");
+    svg
+      .append("text")
+      .attr("x", width - 100)
+      .attr("y", 50)
+      .text("Carnivores")
+      .style("font-size", "15px")
+      .attr("alignment-baseline", "middle")
+      .style("fill", "currentColor");
+    svg
+      .append("text")
+      .attr("x", width - 100)
+      .attr("y", 80)
+      .text("Herbivores")
+      .style("font-size", "15px")
+      .attr("alignment-baseline", "middle")
+      .style("fill", "currentColor");
   }, [animalData]);
 
   // TODO: Return the graph
-  return (
-    // Placeholder so that this compiles. Delete this below:
-    <div>
-      <h1> TODO: Delete this div in `animal-speed-graph.tsx` and implement the graph: </h1>
-    </div>
-  );
+  return <div ref={graphRef}></div>;
 }
