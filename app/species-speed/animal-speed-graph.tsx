@@ -6,15 +6,18 @@ import { scaleBand, scaleLinear, scaleOrdinal } from "d3-scale";
 import { max } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis"; // D3 is a JavaScript library for data visualization: https://d3js.org/
 import { csv } from "d3-fetch";
+import { select } from "d3-selection";
+import { useEffect, useRef, useState } from "react";
 
 // Example data: Only the first three rows are provided as an example
 // Add more animals or change up the style as you desire
 
 // TODO: Write this interface
-interface AnimalDatum  {
-
+interface AnimalDatum {
+  name: string;
+  speed: number;
+  diet: "herbivore" | "carnivore" | "omnivore";
 }
-
 
 export default function AnimalSpeedGraph() {
   // useRef creates a reference to the div where D3 will draw the chart.
@@ -25,7 +28,19 @@ export default function AnimalSpeedGraph() {
 
   // TODO: Load CSV data
   useEffect(() => {
-    console.log("Implement CSV loading!")
+    csv("/sample_animals.csv").then((data) => {
+      let dataTemp = [];
+      for (let i = 0; i < data.length; i++) {
+        let datum: AnimalDatum = {
+          name: data[i]?.["Animal"] || "",
+          speed: parseFloat(data[i]?.["Average Speed (km/h)"] || "0"),
+          diet: data[i]?.["Diet"] as "herbivore" | "carnivore" | "omnivore",
+        };
+        dataTemp.push(datum);
+      }
+      setAnimalData(dataTemp);
+      console.log("Animal data loaded:", dataTemp);
+    });
   }, []);
 
   useEffect(() => {
@@ -47,10 +62,7 @@ export default function AnimalSpeedGraph() {
 
     // Create the SVG element where D3 will draw the chart
     // https://github.com/d3/d3-selection
-    const svg  = select(graphRef.current!)
-      .append<SVGSVGElement>("svg")
-      .attr("width", width)
-      .attr("height", height)
+    const svg = select(graphRef.current!).append<SVGSVGElement>("svg").attr("width", width).attr("height", height);
 
     // TODO: Implement the rest of the graph
     // HINT: Look up the documentation at these links
