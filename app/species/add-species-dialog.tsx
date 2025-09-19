@@ -98,7 +98,7 @@ async function fetchFromWikipedia(title: string) {
     message: "Data fetched successfully",
     data: {
       summary: data.extract,
-      image: data.originalimage.source,
+      image: data.originalimage?.source,
     },
   };
 }
@@ -288,7 +288,13 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
                                       });
                                     }
                                   })
-                                  .catch((err) => console.log(err));
+                                  .catch(() => {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to fetch data from Wikipedia",
+                                      variant: "destructive",
+                                    });
+                                  });
                               }}
                             >
                               Fetch from Wikipedia
@@ -340,7 +346,13 @@ export default function AddSpeciesDialog({ userId }: { userId: string }) {
                                       });
                                     }
                                   })
-                                  .catch((err) => console.log(err));
+                                  .catch(() => {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to fetch data from Wikipedia",
+                                      variant: "destructive",
+                                    });
+                                  });
                               }}
                             >
                               Fetch from Wikipedia
